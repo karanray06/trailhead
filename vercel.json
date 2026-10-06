@@ -1,0 +1,39 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "agent": {
+      "root": "agent",
+      "framework": "express",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "predict",
+          "format": "url",
+          "env": "PREDICT_URL"
+        }
+      ]
+    },
+    "predict": {
+      "root": "predict",
+      "framework": "fastapi"
+    },
+    "web": {
+      "root": "web",
+      "framework": "vite"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "agent"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "web"
+      }
+    }
+  ]
+}
