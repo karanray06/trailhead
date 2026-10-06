@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Activity, Compass, Wind, Sun, Cloud, Thermometer, Volume2, TreePine, Navigation } from 'lucide-react';
+import { MapPin, Activity, Compass, Sun, Cloud, Thermometer, Volume2, TreePine, Navigation } from 'lucide-react';
 import './index.css';
 
 // Type definitions based on what the API will return
