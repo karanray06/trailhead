@@ -1,0 +1,57 @@
+# Trailhead — docker-compose
+# One-command local run: docker compose up
+#
+# Services:
+#   predict  — TabPFN weather prediction (FastAPI, port 8001)
+#   agent    — Mastra agent server (port 3001)
+#   web      — Vite dev server (port 5173)
+#
+# Ollama runs on the host (not in Docker) — see README for setup.
+
+version: "3.9"
+
+services:
+  predict:
+    build:
+      context: .
+      dockerfile: predict/Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./data:/app/data:ro
+    environment:
+      - WEATHER_CSV_PATH=/app/data/weather_sample.csv
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - MODEL_NAME=${MODEL_NAME:-gemma3:4b}
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - PREDICT_URL=http://predict:8001
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    depends_on:
+      predict:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+      - VITE_PREDICT_URL=http://localhost:8001
+    depends_on:
+      - agent
